@@ -24,7 +24,16 @@ https://www.redhat.com/ko/topics/automation/what-is-infrastructure-as-code-iac
 https://j-dev.tistory.com/search/Terraform?page=1
 
 - Terraform AWS
+https://developer.hashicorp.com/terraform/tutorials/aws-get-started
 https://terraform101.inflearn.devopsart.dev/cont/
+
+- Terraform Azure 
+https://developer.hashicorp.com/terraform/tutorials/azure-get-started
+https://learn.microsoft.com/ko-kr/azure/developer/terraform/
+
+- Terraform GCP 
+https://developer.hashicorp.com/terraform/tutorials/gcp-get-started
+https://cloud.google.com/docs/terraform/get-started-with-terraform
 
 - Terraform Naver Cloud
 https://docs.toast.com/ko/Compute/Instance/ko/terraform-guide/
