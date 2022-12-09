@@ -7,6 +7,10 @@
 ########################################################
 ### TERRAFORM
 
+https://www.terraform.io/
+https://developer.hashicorp.com/terraform/docs
+
+
 
 ########################################################
 ### Reference
