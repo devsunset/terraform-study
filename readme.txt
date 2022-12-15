@@ -87,3 +87,16 @@ API를 호출해 명령을 실행하는 절차적인 방법과 달리 HCL은 선
 * Apply
     테라폼 프로젝트 디렉터리 아래의 모든 .tf 파일의 내용대로 리소스를 생성, 수정, 삭제하는 일을 적용
 
+
+# Terraform Install
+
+https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+
+
+# Terraform 기본 처리 단계 
+테라폼을 활용한 AWS 인프라스트럭처 프로비저닝 순서
+1. AWS 계정, API 키 설정
+2. HCL 언어로 필요한 리소스 선언(*.tf 생성)
+3. 선언된 리소스들이 생성 가능한지 계획 확인(terraform plan)
+4. 선언된 리소스들을 AWS에 적용(terraform apply)
+5. 선언된 리소스 한번에 제거 (terraform destroy)
