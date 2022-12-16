@@ -142,8 +142,8 @@ https://kim-dragon.tistory.com/249
 	    테라폼 프로젝트 디렉터리 아래의 모든 .tf 파일의 내용대로 리소스를 생성, 수정, 삭제하는 일을 적용
 
 	* HCL
-	    HCL ( Hashicorp Configuration Languate ) 는 Terraform 을 만든 제작사인 hashicorp 에서 만든 Terraform 전용 DSL ( Domain Specific Language )
-	    Terraform 의 설정 파일들은 HCL 로 기술되며, .tf 의 파일 확장자를 가짐 
+	    HCL ( Hashicorp Configuration Languate ) 는 Terraform 을 만든 제작사인 hashicorp 에서 만든 Terraform 전용 DSL
+	    ( Domain Specific Language ) Terraform 의 설정 파일들은 HCL 로 기술되며, .tf 의 파일 확장자를 가짐 
 
 
 # Terraform command
@@ -357,9 +357,9 @@ https://kim-dragon.tistory.com/249
 	GCP에서는 백엔드에 지정한 경로에 워크스페이스 명.tfstate 파일이 생성
 
 	위의 워크스페이스에는 몇 가지 단점이 있음 
-    모든 작업 공간의 상태 파일이 동일한 스토리지에 저장
-    terraform workspace 명령어를 실행하지 않으면 워크스페이스에 대한 정보를 알기가 어려움
-    어떠한 워크스페이스에서 작업하는지 잊어버릴 수가 있어 실수를 할 수가 있음 
+	모든 작업 공간의 상태 파일이 동일한 스토리지에 저장
+	terraform workspace 명령어를 실행하지 않으면 워크스페이스에 대한 정보를 알기가 어려움
+	어떠한 워크스페이스에서 작업하는지 잊어버릴 수가 있어 실수를 할 수가 있음 
 
     2. 파일 레이아웃을 이용한 격리
 	환경을 완전히 격리하려면  각 테라폼 구성 파일을 분리된 폴더에 위치 
@@ -368,10 +368,10 @@ https://kim-dragon.tistory.com/249
 	각 환경별 VPC, 서비스, 데이터 베이스 같은 각 구성 요소를 별도의 테라폼 폴더 혹은 별도의 상태 파일에서 사용하는 것을 권장 
 
 	위와 같은 구성은 면에서 단점
-    실수로 인한 인프라를 망가뜨리진 않겠지만 한 번의 명령으로 전체 인프라를 만들수 없음 
-    위와 같은 구성에서는 각 구성 요소 각각에 apply 명령을 실행해야 함
-    테라그런트를 사용하는 경우 apply-all 명령을 사용하여 이 프로세스를 자동화 할 수는 있음 
-    다른 폴더에 있는 리소스를 직접 액세스 할 수 없어 리소스 종속성을 사용할 수 없음 
+	실수로 인한 인프라를 망가뜨리진 않겠지만 한 번의 명령으로 전체 인프라를 만들수 없음 
+	위와 같은 구성에서는 각 구성 요소 각각에 apply 명령을 실행해야 함
+	테라그런트를 사용하는 경우 apply-all 명령을 사용하여 이 프로세스를 자동화 할 수는 있음 
+	다른 폴더에 있는 리소스를 직접 액세스 할 수 없어 리소스 종속성을 사용할 수 없음 
 
 
 # Example
