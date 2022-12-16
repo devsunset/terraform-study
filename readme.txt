@@ -316,6 +316,18 @@ https://kim-dragon.tistory.com/249
 	상태파일은 프라이빗이며 직접 편집하거나 수정해서는 안됨 
 	파일 상태를 조작해야 하는 경우 terraform import, terraform state 명령을 통해 조작
 
+	terraform init과 terraform apply 명령어를 실행하면 실제로 다음의 파일이 생성
+    .terraform
+    .terraform.lock.hcl
+    terraform.tfstate
+
+    .terraform.* 형태의 파일들은 terraform init 명령어를 실행할 때 생성되며 
+    terraform.tfstate는 terraform apply 명령어 실행 후 생성 
+    terraform.tfstate는 JSON 형태로 되어 있는데, 이는 terraform으로 구성된 인프라스터럭처의 현재 상태를 보여준다.
+    .terraform.lock.hcl은 잠금 파일이며 경쟁 상태에서 생길 수 있는 문제들을 피할 수 있게 해준다.
+    하지만 개인 프로젝트처럼 개인 혹은 머신 한대에서 terraform으로 인프라를 운영한다면 딱히 도움되는 것은 없다.
+    하지만 팀으로써 운영한다면 얘기가 달라진다. 이 장에서는 terraform을 팀으로써 운영할 때 상태 파일을 공유하고,
+    이 상태 파일을 이용해서 다른 인프라스트럭처 구성 시 어떻게 사용할 수 있는지 확인 가능 
 
     테라폼을 사용하여 인프라를 업데이트하려면 각 팀원이 동일한 테라폼 상태 파일에 엑세스해야 하므로, 
     상태 파일을 공유 위치에 저장해야 합니다.
@@ -323,7 +335,6 @@ https://kim-dragon.tistory.com/249
     이러한 상태가 되면 데이터가 손실되거나 상태 파일이 손상될 수 있습니다.
     인프라를 변경할 때는 다른 환경을 격리하는 것이 가장 좋습니다. 예를 들어 테스트 환경을 변경할 경우 실수로 
     운영 환경이 중단되는 경우가 없는지 확인해야 합니다.
-
 
     * 상태 파일 공유
 	테라폼의 상태 파일을 깃과 같은 형상관리 시스템에 공유하는 것은 다음과 같은 이유 때문에 부적절
@@ -842,3 +853,148 @@ resource "aws_dynamodb_table" "terraform_locks" {
     type = "S"
   }
 }
+
+
+* Docker example.tf  (도커에 nginx 설치)
+---------------------------------------------------------------------------
+terraform {
+  required_providers {
+    docker = {
+      source = "kreuzwerker/docker"
+    }
+  }
+}
+
+provider "docker" {}
+
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+  keep_locally = false
+}
+
+resource "docker_container" "nginx" {
+  image = docker_image.nginx.latest
+  name  = "tutorial"
+  ports {
+    internal = 80
+    external = 8000
+  }
+}
+
+* AWS example.tf  (ELB 생성 리소스)
+---------------------------------------------------------------------------
+provider "aws" {
+  region = "us-east-1"
+}
+
+variable "server_port" {
+  description = "The port the server will use HTTP requests"
+  default = 8080
+}
+
+data "aws_availability_zones" "all" {}
+
+resource "aws_security_group" "instance" {
+  name = "terraform-example-instance"
+  ingress {
+    from_port = var.server_port
+    to_port = var.server_port
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group" "elb" {
+  name = "terraform-example-elb"
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+resource "aws_launch_configuration" "example" {
+  image_id = "ami-0d5eff06f840b45e9"
+  instance_type = "t2.micro"
+  security_groups = [aws_security_group.instance.id]
+
+  user_data = <<-EOF
+            #!/bin/bash
+            echo "Hello, World" > index.html
+            nohup python3 -m http.server ${var.server_port} &
+            EOF
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_autoscaling_group" "example" {
+  launch_configuration = aws_launch_configuration.example.id
+  availability_zones = data.aws_availability_zones.all.names
+
+  load_balancers = [aws_elb.example.name]
+  health_check_type = "ELB"
+
+  min_size = 2
+  max_size = 10
+
+  tag {
+    key = "Name"
+    value = "terraform-asg-example"
+    propagate_at_launch = true
+  }
+}
+
+resource "aws_elb" "example" {
+  name = "terraform-asg-example"
+  availability_zones = data.aws_availability_zones.all.names
+  security_groups = [aws_security_group.elb.id]
+
+  listener {
+    lb_port = 80
+    lb_protocol = "http"
+    instance_port = var.server_port
+    instance_protocol = "http"
+  }
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 2
+    timeout = 3
+    interval = 30
+    target = "HTTP:${var.server_port}/" 
+  }
+}
+
+output "elb_dns_name" {
+  value = aws_elb.example.dns_name  
+}
+
+
+
+* AWS example.tf  (To-Do)
+---------------------------------------------------------------------------
+Terraform을 위한 AWS 환경 준비하기
+Terraform으로 IAM 구성하기
+Terraform으로 S3 구성하기
+Terraform으로 DynamoDB 구성하기
+Terraform으로 VPC 구성하기
+Terraform으로 EC2 구성하기
+Terraform으로 RDS 구성하기
+Terraform으로 AutoScaling Group 구성하기
+Terraform으로 Network Load Balancer 구성하기
+Terraform으로 Application Load Balancer 구성하기
