@@ -22,12 +22,11 @@ https://www.redhat.com/ko/topics/automation/what-is-infrastructure-as-code-iac
 https://hvho.github.io/2021-07-25/terraform-up-and-running-1
 
 - Terraform
-https://gurumee92.tistory.com/tag/%ED%85%8C%EB%9D%BC%ED%8F%BC
+https://gurumee92.tistory.com/category/IaC/Terraform
 https://j-dev.tistory.com/search/Terraform?page=1
 https://www.44bits.io/ko/keyword/terraform
 https://www.44bits.io/ko/post/terraform_introduction_infrastrucute_as_code
 https://j-dev.tistory.com/search/Terraform?page=1
-https://velog.io/@borab/terraform-%EC%9D%B4%EB%9E%80
 https://hvho.github.io/2021-08-29/terraform-up-and-running-2
 
 - Terraform AWS
@@ -120,6 +119,28 @@ https://kim-dragon.tistory.com/249
 # Terraform 설치
 	https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli	
 
+	Terraform을 메뉴얼하게 바로 설치해도 좋지만, 실제 개발 환경에 따라서 여러 버전을 사용할 가능성이 있다.
+	때문에 Terraform 버전 관리 도구인 tfenv를 먼저 설치하고, 이를 이용해서 Terraform을 설치한다.
+
+	# tfenv 설치
+	$ brew install tfenv
+
+	# tfenv 설치 확인
+	$ tfenv --version
+	tfenv 2.2.0
+
+	# terraform 최신 버전 설치
+	$ tfenv install
+
+	# terraform 특정 버전 설치를 원한다면 다음과 같은 형식으로 할 수 있다.
+	$ tfenv install 0.14.6
+
+	# terraform 버전 사용
+	$ tfenv use 0.14.6
+
+	# terraform 버전 확인
+	$ terraform version
+	Terraform v0.14.6
 
 # 테라폼 기본 개념
 	* 프로비저닝
@@ -144,6 +165,18 @@ https://kim-dragon.tistory.com/249
 	* HCL
 	    HCL ( Hashicorp Configuration Languate ) 는 Terraform 을 만든 제작사인 hashicorp 에서 만든 Terraform 전용 DSL
 	    ( Domain Specific Language ) Terraform 의 설정 파일들은 HCL 로 기술되며, .tf 의 파일 확장자를 가짐 
+
+    * state
+    	테라폼을 통해 생성된 리소스들의 상태를 의미 (= 테라폼 apply 명령어를 실행한 결과물)
+    
+    * output
+    	테라폼으로 만든 리소스를 변수 형태로 state에 저장하는 것을 의미
+    
+    * module
+    	공통적으로 활용할 수 있는 모듈을 정의하는 것을 의미
+
+    * remote
+    	다른 경로의 state를 참조하는 것을 의미하며, output 변수를 불러올 때 주로 사용
 
 
 # Terraform command
