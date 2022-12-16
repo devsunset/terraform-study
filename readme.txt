@@ -57,7 +57,7 @@ https://kim-dragon.tistory.com/249
 	수동으로 구성 시 발생하는 누락 및 잘못 설정하는 등의 인적 실수를  방지 
 	인프라 구성을 코드로 처리하므로 애플리케이션 구성과의 경계가 좁아지면서 개발자와 운영자의 경계가 모호해진 DevOps에서 많이 사용 
 
- # Iac 종류
+ * Iac 종류
 	- 애드혹 스크립트 
 	bash 스크립트 등을 서버에 직접 실행하는 방식
 
@@ -75,7 +75,7 @@ https://kim-dragon.tistory.com/249
 	- 오케스트레이션 도구
 	쿠버네티스 등으로 위 서버 템플릿 도구로 생성한 서버 스냅숏을 실제 인프라에 띄워 관리하는 도구
 
-#  Iac 장점 
+*  Iac 장점 
 	- 자급식 배포
 	자동 배포 파이프라인을 구성해 놓음으로써, 일부의 관리자 말고도 모든 개발자가 원할때 직접 배포 가능 
 
@@ -112,6 +112,10 @@ https://kim-dragon.tistory.com/249
 	서브 명령어는 이를 자신의 클라우드 계정에 실제로 적용
 
 
+# Terraform 설치
+	https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli	
+
+
 # 테라폼 기본 개념
 	* 프로비저닝
 	    어떤 프로세스나 서비스를 실행하기 위한 준비 단계
@@ -135,50 +139,6 @@ https://kim-dragon.tistory.com/249
 	* HCL
 	    HCL ( Hashicorp Configuration Languate ) 는 Terraform 을 만든 제작사인 hashicorp 에서 만든 Terraform 전용 DSL ( Domain Specific Language )
 	    Terraform 의 설정 파일들은 HCL 로 기술되며, .tf 의 파일 확장자를 가짐 
-
-# Terraform LifeCycle
-	Terraform 으로 인프라를 프로비저닝 하는 일련의 작업은  계획(Plan)-적용(Apply)-삭제(Destroy) 의 과정
-
-	* 계획(Plan)
-	테라폼을 통해 인프라 작업을 하면, 직접 콘솔을 통해 인프라를 변경시키는 것에 비해서 코드를 실제 환경하기 적용하기 전에 
-	“검증” 단계를 거칠 수 있는 장점  콘솔로 작업하면 인프라가 바로 변경되지만, 코드로 작업하면 해당 코드를 환경에 적용하기 전 
-	static validation 할 수 있음
-	해당 단계를 테라폼은 계획 단계라고 하며, 해당 단계는 현재 적용되어 있는 리소스들의 상태와 코드를 적용 시켰을 때 변경될 
-	리소스의 상태의 차이를 보여줌 	코드를 실제 환경에 적용하기 전, 코드의 변경점이 내가 의도한 변경사항이 맞는지 확인해 보는
-	단계이고, 해당 명령어는 실제 환경에 영향을 주지 않기 때문에 내가 정확히 원하는 결과를 얻을 때 까지 반복해서 확인 가능 
-
-	* 적용(Apply)
-	코드의 변경 사항을 실제 환경에 적용시키는 단계
-	적용이 성공한다면 변경 ( 추가 / 변경 / 삭제 ) 된 리소스의 정보가 출력되고, 만약 실패한다면 실패한 이유 출력 
-	적용 명령은 멱등성(idempotent) 을 가지기 때문에 여러번 적용하여도 작성한 코드와 동일한 상태를 보장
-	리소스 여러개를 생성하다 중간에 실패했을 경우에도 코드를 고쳐 다시 적용하면 이전에 만들어졋던 리소스는 알아서 처리
-
-	* 삭제(Destory)
-	모든 인프라를 삭제하는 명령어
-
-	------------------
-
-	* terraform import 
-	운영중인 리소스를 참조해서 code화 시킬 수 있음 
-	terraform(0.12.16)에서는 import 명령어를 사용하기 전에 빈 tf 파일이 존재해야 함 
-
-	terraform import aws_instance.<resource name> <instance ID>
-
-	import가 되었다면 .tfstate 파일이 업데이트 됨 (실행 폴더에 .tfstate 파일이 미존재시 새로 생성)
-	import는 사용에 매우 유의
-
-	테라폼은 apply시에 .tf 파일에는 없고 .tfstate 에만 있는 인프라 정보를 삭제
-	만약 운영환경에서 모든 ec2를 import한 후  .tf파일을 생성하지 않은채  apply 할 경우 모든 운영환경이 destroy 됨 
-
-	* terraform graph
-	하나의 리소스에서 다른 리소스로 참조를 추가하면 내재된 종속성이 작성
-	테라폼은 이러한 종속성 구문을 분석하여 그래프를 작성하고 이를 사용하여 리소스를 생성하는 순서를 자동으로 결정
-
-	------------------
-
-# Terraform Install
-
-https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 
 # Terraform command
@@ -223,6 +183,50 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 	  -version      An alias for the "version" subcommand.
 
 
+# Terraform LifeCycle
+	Terraform 으로 인프라를 프로비저닝 하는 일련의 작업은  계획(Plan)-적용(Apply)-삭제(Destroy) 의 과정
+
+	------------------
+
+	* 계획(Plan)
+	테라폼을 통해 인프라 작업을 하면, 직접 콘솔을 통해 인프라를 변경시키는 것에 비해서 코드를 실제 환경하기 적용하기 전에 
+	“검증” 단계를 거칠 수 있는 장점  콘솔로 작업하면 인프라가 바로 변경되지만, 코드로 작업하면 해당 코드를 환경에 적용하기 전 
+	static validation 할 수 있음
+	해당 단계를 테라폼은 계획 단계라고 하며, 해당 단계는 현재 적용되어 있는 리소스들의 상태와 코드를 적용 시켰을 때 변경될 
+	리소스의 상태의 차이를 보여줌 	코드를 실제 환경에 적용하기 전, 코드의 변경점이 내가 의도한 변경사항이 맞는지 확인해 보는
+	단계이고, 해당 명령어는 실제 환경에 영향을 주지 않기 때문에 내가 정확히 원하는 결과를 얻을 때 까지 반복해서 확인 가능 
+
+	* 적용(Apply)
+	코드의 변경 사항을 실제 환경에 적용시키는 단계
+	적용이 성공한다면 변경 ( 추가 / 변경 / 삭제 ) 된 리소스의 정보가 출력되고, 만약 실패한다면 실패한 이유 출력 
+	적용 명령은 멱등성(idempotent) 을 가지기 때문에 여러번 적용하여도 작성한 코드와 동일한 상태를 보장
+	리소스 여러개를 생성하다 중간에 실패했을 경우에도 코드를 고쳐 다시 적용하면 이전에 만들어졋던 리소스는 알아서 처리
+
+	* 삭제(Destory)
+	모든 인프라를 삭제하는 명령어
+
+	------------------
+
+	* terraform import 
+	운영중인 리소스를 참조해서 code화 시킬 수 있음 
+	terraform(0.12.16)에서는 import 명령어를 사용하기 전에 빈 tf 파일이 존재해야 함 
+
+	terraform import aws_instance.<resource name> <instance ID>
+
+	import가 되었다면 .tfstate 파일이 업데이트 됨 (실행 폴더에 .tfstate 파일이 미존재시 새로 생성)
+	import는 사용에 매우 유의
+
+	테라폼은 apply시에 .tf 파일에는 없고 .tfstate 에만 있는 인프라 정보를 삭제
+	만약 운영환경에서 모든 ec2를 import한 후  .tf파일을 생성하지 않은채  apply 할 경우 모든 운영환경이 destroy 됨 
+
+	* terraform graph
+	하나의 리소스에서 다른 리소스로 참조를 추가하면 내재된 종속성이 작성
+	테라폼은 이러한 종속성 구문을 분석하여 그래프를 작성하고 이를 사용하여 리소스를 생성하는 순서를 자동으로 결정
+	결과값으로는 DOT라는 언어로 되어 있으며, 그래프비즈 혹은 그래프비즈온라인(https://dreampuf.github.io/GraphvizOnline/) 
+	같은 앱을 사용하면 그래프 이미지로 확인 가능 
+
+	------------------
+
 # Terraform work process
 	0. provider 정보 생성 - AWS 계정, API 키 설정
 	1. *.tf 작성 - HCL 언어로 필요한 리소스 선언(*.tf 생성)
@@ -231,7 +235,6 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 	4. terraform plan - 선언된 리소스들이 생성 가능한지 계획 확인
 	5. terraform appply - 선언된 리소스들을 적용r
 	6. terraform destory - 선언된 리소스 한번에 제거
-
 
 
 # Example
