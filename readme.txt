@@ -19,11 +19,14 @@ https://github.com/shuaibiyy/awesome-terraform
 
 -  Iac
 https://www.redhat.com/ko/topics/automation/what-is-infrastructure-as-code-iac
+https://hvho.github.io/2021-07-25/terraform-up-and-running-1
 
 - Terraform
+https://www.44bits.io/ko/post/terraform_introduction_infrastrucute_as_code
 https://j-dev.tistory.com/search/Terraform?page=1
 https://velog.io/@borab/terraform-%EC%9D%B4%EB%9E%80
 https://www.44bits.io/ko/keyword/terraform
+https://hvho.github.io/2021-08-29/terraform-up-and-running-2
 
 - Terraform AWS
 https://developer.hashicorp.com/terraform/tutorials/aws-get-started
@@ -47,56 +50,220 @@ https://kim-dragon.tistory.com/249
 ### Terraform Guide
 
 # IaC(Infrastruction as Code)
-코드를 이용해 인프라를 자동으로 구축, 관리, 프로비저닝하는 접근 방식
-프로비저닝, 시스템 변경 및 구성에 대해 일관되게 반복되는 과정을 코드를 통해 자동화 하면 빠르게 변경/구성할 수 있으며, 
-수동으로 구성 시 발생하는 누락 및 잘못 설정하는 등의 인적 실수를  방지 
-인프라 구성을 코드로 처리하므로 애플리케이션 구성과의 경계가 좁아지면서 개발자와 운영자의 경계가 모호해진 요즘의 DevOps에서 많이 사용됨 
+	코드를 이용해 인프라를 자동으로 구축, 관리, 프로비저닝하는 접근 방식
+	프로비저닝, 시스템 변경 및 구성에 대해 일관되게 반복되는 과정을 코드를 통해 자동화 하면 빠르게 변경/구성할 수 있으며, 
+	수동으로 구성 시 발생하는 누락 및 잘못 설정하는 등의 인적 실수를  방지 
+	인프라 구성을 코드로 처리하므로 애플리케이션 구성과의 경계가 좁아지면서 개발자와 운영자의 경계가 모호해진 요즘의 DevOps에서 많이 사용됨 
 
  # Iac 종류
-- Provisioning Tool 
-컴퓨터나 가상호스트를 사용해 라이브러리나 서비스등을 설치하는것을 의미 
-ex) Terraform, Cloudformation
+	- 애드혹 스크립트 
+	bash 스크립트 등을 서버에 직접 실행하는 방식
 
--SCM Tool
-성능부터 H/W 속성과 라이프사이클 전반에  걸친  요구사항 설계 및 운영정보의 일관선을 유지하기 위한 시스템 프로세스 
-ex) Chef Puppet Ansible
+	- Provisioning Tool 
+	컴퓨터나 가상호스트를 사용해 라이브러리나 서비스등을 설치하는것을 의미 
+	ex) Terraform, Cloudformation
+
+	- SCM Tool (구성 관리 도구)
+	성능부터 H/W 속성과 라이프사이클 전반에  걸친  요구사항 설계 및 운영정보의 일관선을 유지하기 위한 시스템 프로세스 
+	ex) Chef Puppet Ansible
+
+	- 서버 템플릿 도구
+	도커 등으로 서버 환경에 필요한 운영체제, 소프트웨어, 파일등을 모두 포함하고 있는 이미지(스냅숏)으로 관리하는 도구
+
+	- 오케스트레이션 도구
+	쿠버네티스 등으로 위 서버 템플릿 도구로 생성한 서버 스냅숏을 실제 인프라에 띄워 관리하는 도구
+
+#  Iac 장점 
+	- 자급식 배포
+	자동 배포 파이프라인을 구성해 놓음으로써, 일부의 관리자 말고도 모든 개발자가 원할때 직접 배포 가능 
+
+	- 속도와 안정성
+	사람 대신 컴퓨터가 자동으로 배포하면 당연히 속도가 빨라지고 human error 가 발생할 소지가 적음 
+
+	- 문서화
+	소스파일 자체가 인프라에 대한 문서 역할
+
+	- 버전관리
+	인프라의 변경 내역을 git 과 같은 버전 관리 도구로 관리할 수 있음 
+
+	- 유효성 검증
+	인프라가 변경을 적용 전 정적 분석을 통해 오류를 미리 확인 가능 
+
+	- 재사용성
+	인프라 코드를 재사용 함으로써 비슷한 인프라에 대해서 재사용 가능 
+
 
 # Terraform
-Terraform은 Hashicorp에서 오픈소스로 개발중인 클라우드 인프라스트럭처 자동화를 지향하는 코드로서의 인프라스트럭처Infrastructure as Code, IaC 도구
-IaC는 코드로 인프라스트럭처를 관리한다는 개념으로 테라폼에서는 하시코프 설정 언어HCL, Hashicorp Configuration Language을 사용해 클라우드 리소스를 선언 아마존 웹 서비스Amazon Web Service가 자체적으로 만든 AWS CloudFormation의 경우 AWS만 지원하는 것과 달리 테라폼의 경우 Amazon Web Service, Google Cloud Platform, Microsoft Azure와 같은 주요 클라우드 서비스를 비롯한 다양한 클라우드 서비스들을 프로바이더 방식으로 제공
-이를 통해 테라폼만으로 멀티 클라우드의 리소스들을 선언하고 코드로 관리하는 것도 가능
+	Terraform은 Hashicorp에서 오픈소스로 개발중인 클라우드 인프라스트럭처 자동화를 지향하는 코드로서의 인프라스트럭처Infrastructure as Code, IaC 도구
+	IaC는 코드로 인프라스트럭처를 관리한다는 개념으로 테라폼에서는 하시코프 설정 언어HCL, Hashicorp Configuration Language을 사용해 클라우드 리소스를 선언 아마존 웹 서비스Amazon Web Service가 자체적으로 만든 AWS CloudFormation의 경우 AWS만 지원하는 것과 달리 테라폼의 경우 Amazon Web Service, Google Cloud Platform, Microsoft Azure와 같은 주요 클라우드 서비스를 비롯한 다양한 클라우드 서비스들을 프로바이더 방식으로 제공
+	이를 통해 테라폼만으로 멀티 클라우드의 리소스들을 선언하고 코드로 관리하는 것도 가능
 
-테라폼은 고Go 프로그래밍 언어로 개발 
-테라폼 사용자는 HCL 언어로 클라우드 리소스를 정의하고 이 내용을 테라폼 CLI 애플리케이션(terraform)으로 자신의 클라우드 계정에 실제로 반영
-API를 호출해 명령을 실행하는 절차적인 방법과 달리 HCL은 선언적으로 리소스를 정의하기 때문에 리소스를 정의하고 여러번 테라폼을 실행한다고 여러 개의 리소스가 만들어지지는 않음(멱등성) 테라폼을 사용하면 이 과정을 계획(plan)과 적용(apply) 단계로 나누어 진행 plan 서브 명령어를 사용하면 클라우드에 적용될 변화 사항을 보여주며 apply 서브 명령어는 이를 자신의 클라우드 계정에 실제로 적용
+	테라폼은 고Go 프로그래밍 언어로 개발 
+	테라폼 사용자는 HCL 언어로 클라우드 리소스를 정의하고 이 내용을 테라폼 CLI 애플리케이션(terraform)으로 자신의 클라우드 계정에 실제로 반영
+	API를 호출해 명령을 실행하는 절차적인 방법과 달리 HCL은 선언적으로 리소스를 정의하기 때문에 리소스를 정의하고 여러번 테라폼을 실행한다고 여러 개의 리소스가 만들어지지는 않음(멱등성) 테라폼을 사용하면 이 과정을 계획(plan)과 적용(apply) 단계로 나누어 진행 plan 서브 명령어를 사용하면 클라우드에 적용될 변화 사항을 보여주며 apply 서브 명령어는 이를 자신의 클라우드 계정에 실제로 적용
 
 
 # 테라폼 기본 개념
-* 프로비저닝
-    어떤 프로세스나 서비스를 실행하기 위한 준비 단계
-    프로바이더로는 aws, 구글 클라우드 플랫폼, 마이크로소프트 애저와 같은 범용 클라우드 서비스를 비롯해 깃허브, 
-    데이터 도그와 같은 특정 기능을 제공하는 서비스, mysql, 도커와 같은 로컬 서비스를 지원
+	* 프로비저닝
+	    어떤 프로세스나 서비스를 실행하기 위한 준비 단계
+	    프로바이더로는 aws, 구글 클라우드 플랫폼, 마이크로소프트 애저와 같은 범용 클라우드 서비스를 비롯해 깃허브, 
+	    데이터 도그와 같은 특정 기능을 제공하는 서비스, mysql, 도커와 같은 로컬 서비스를 지원
 
-* Resource
-    리소스란 특정 프로바이더가 제공해주는 조작 가능한 대상의 최소 단위
+	* Provider
+	    Terraform 은 AWS, GCP, AZURE 등 여러 클라우드 인프라 환경을 지원하는데, 이렇게 클라우드 인프라 공급자 들이 Provider 
 
-* Plan
-    테라폼 프로젝트 디렉터리 아래의 모든 .tf 파일의 내용을 실제로 적용 가능한지 확인 하는 작업
-    테라폼은 이를 terraform plan 명령어로 제공하며, 이를 명령어로 실행하면 어떤 리소스가 생성되고, 수정되고, 삭제될지 보여줌
+	* Resource
+	    리소스란 특정 프로바이더가 제공해주는 조작 가능한 대상의 최소 단위
+	    예를 들어 EC2 instance, LB( Load Balencer ), DNS( Domain Name Server ), RDS 등의 각 요소들
 
-* Apply
-    테라폼 프로젝트 디렉터리 아래의 모든 .tf 파일의 내용대로 리소스를 생성, 수정, 삭제하는 일을 적용
+	* Plan
+	    테라폼 프로젝트 디렉터리 아래의 모든 .tf 파일의 내용을 실제로 적용 가능한지 확인 하는 작업
+	    테라폼은 이를 terraform plan 명령어로 제공하며, 이를 명령어로 실행하면 어떤 리소스가 생성되고, 수정되고, 삭제될지 보여줌
 
+	* Apply
+	    테라폼 프로젝트 디렉터리 아래의 모든 .tf 파일의 내용대로 리소스를 생성, 수정, 삭제하는 일을 적용
+
+	* HCL
+	    HCL ( Hashicorp Configuration Languate ) 는 Terraform 을 만든 제작사인 hashicorp 에서 만든 Terraform 전용 DSL ( Domain Specific Language )
+	    Terraform 의 설정 파일들은 HCL 로 기술되며, .tf 의 파일 확장자를 가짐 
+
+# Terraform LifeCycle
+	Terraform 으로 인프라를 프로비저닝 하는 일련의 작업은  계획(Plan)-적용(Apply)-삭제(Destroy) 의 과정
+
+	* 계획(Plan)
+	테라폼을 통해 인프라 작업을 하면, 직접 콘솔을 통해 인프라를 변경시키는 것에 비해서 코드를 실제 환경하기 적용하기 전에 “검증” 단계를 거칠 수 있는 장점  콘솔로 작업하면 인프라가 바로 변경되지만, 코드로 작업하면 해당 코드를 환경에 적용하기 전 static validation 할 수 있음
+	해당 단계를 테라폼은 계획 단계라고 하며, 해당 단계는 현재 적용되어 있는 리소스들의 상태와 코드를 적용 시켰을 때 변경될 리소스의 상태의 차이를 보여줌 
+	코드를 실제 환경에 적용하기 전, 코드의 변경점이 내가 의도한 변경사항이 맞는지 확인해 보는 단계이고, 해당 명령어는 실제 환경에 영향을 주지 않기 때문에 내가 정확히 원하는 결과를 얻을 때 까지 반복해서 확인 가능 
+
+	* 적용(Apply)
+	코드의 변경 사항을 실제 환경에 적용시키는 단계
+	적용이 성공한다면 변경 ( 추가 / 변경 / 삭제 ) 된 리소스의 정보가 출력되고, 만약 실패한다면 실패한 이유 출력 
+	적용 명령은 멱등성(idempotent) 을 가지기 때문에 여러번 적용하여도 작성한 코드와 동일한 상태를 보장
+	리소스 여러개를 생성하다 중간에 실패했을 경우에도 코드를 고쳐 다시 적용하면 이전에 만들어졋던 리소스는 알아서 처리
+
+	* 삭제(Destory)
+	모든 인프라를 삭제하는 명령어
 
 # Terraform Install
 
 https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 
-# Terraform 기본 처리 단계 
-테라폼을 활용한 AWS 인프라스트럭처 프로비저닝 순서
-1. AWS 계정, API 키 설정
-2. HCL 언어로 필요한 리소스 선언(*.tf 생성)
-3. 선언된 리소스들이 생성 가능한지 계획 확인(terraform plan)
-4. 선언된 리소스들을 AWS에 적용(terraform apply)
-5. 선언된 리소스 한번에 제거 (terraform destroy)
+# Terraform command
+	 ⚡ root@localhost  ~  terraform -help
+	Usage: terraform [global options] <subcommand> [args]
+
+	The available commands for execution are listed below.
+	The primary workflow commands are given first, followed by
+	less common or more advanced commands.
+
+	Main commands:
+	  init          Prepare your working directory for other commands
+	  validate      Check whether the configuration is valid
+	  plan          Show changes required by the current configuration
+	  apply         Create or update infrastructure
+	  destroy       Destroy previously-created infrastructure
+
+	All other commands:
+	  console       Try Terraform expressions at an interactive command prompt
+	  fmt           Reformat your configuration in the standard style
+	  force-unlock  Release a stuck lock on the current workspace
+	  get           Install or upgrade remote Terraform modules
+	  graph         Generate a Graphviz graph of the steps in an operation
+	  import        Associate existing infrastructure with a Terraform resource
+	  login         Obtain and save credentials for a remote host
+	  logout        Remove locally-stored credentials for a remote host
+	  output        Show output values from your root module
+	  providers     Show the providers required for this configuration
+	  refresh       Update the state to match remote systems
+	  show          Show the current state or a saved plan
+	  state         Advanced state management
+	  taint         Mark a resource instance as not fully functional
+	  test          Experimental support for module integration testing
+	  untaint       Remove the 'tainted' state from a resource instance
+	  version       Show the current Terraform version
+	  workspace     Workspace management
+
+	Global options (use these before the subcommand, if any):
+	  -chdir=DIR    Switch to a different working directory before executing the
+	                given subcommand.
+	  -help         Show this help output, or the help for a specified subcommand.
+	  -version      An alias for the "version" subcommand.
+
+
+# Terraform work process
+	0. provider 정보 생성 - AWS 계정, API 키 설정
+	1. *.tf 작성 - HCL 언어로 필요한 리소스 선언(*.tf 생성)
+	2. terraform init - 선언된 리소스들이 생성 가능한지 계획 확인
+	3. terraform validate - 유효성 검사 
+	4. terraform plan - 선언된 리소스들이 생성 가능한지 계획 확인
+	5. terraform appply - 선언된 리소스들을 적용r
+	6. terraform destory - 선언된 리소스 한번에 제거
+
+# example.tf
+provider "aws" {
+  region     = "ap-northeast-2"
+  access_key = "your_access_key"
+  secret_key = "your_secret_key"
+}
+
+resource "aws_security_group" "node" {
+  name          = "allow_node_js_and_ssh"
+  description   = "Allow SSH and nodejs port from all"
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+  }
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = "tcp"
+    from_port   = 3000
+    to_port     = 3000
+  }
+}
+
+data "aws_security_group" "default" {
+  name = "default"
+}
+
+resource "aws_instance" "example" {
+    ami             = "ami-0e17ad9abf7e5c818"
+    instance_type   = "t2.micro"
+    key_name        = "example"
+
+    vpc_security_group_ids = [
+      aws_security_group.node.id,
+      data.aws_security_group.default.id
+    ]
+
+    provisioner "remote-exec" {
+      connection {
+        user        = "ec2-user"
+        private_key = file("your/pem/key")
+        host        = aws_instance.example.public_ip
+      }
+
+      inline = [
+        "sudo amazon-linux-extras install epel -y",
+        "sudo yum install --enablerepo=epel -y nodejs",
+        "sudo wget https://your.helloworld.js.link -O /home/ec2-user/helloworld.js",
+        "sudo wget https://your.helloworld.service.link -O /etc/systemd/system/helloworld.service",
+        "sudo systemctl enable helloworld",
+        "sudo systemctl start helloworld",
+      ]
+  }
+}
+
+# terraform import 
+	운영중인 리소스를 참조해서 code화 시킬 수 있음 
+	terraform(0.12.16)에서는 import 명령어를 사용하기 전에 빈 tf 파일이 존재해야 함 
+
+	terraform import aws_instance.<resource name> <instance ID>
+
+	import가 되었다면 .tfstate 파일이 업데이트 됨 (실행 폴더에 .tfstate 파일이 미존재시 새로 생성)
+	import는 사용에 매우 유의
+
+	테라폼은 apply시에 .tf 파일에는 없고 .tfstate 에만 있는 인프라 정보를 삭제
+	만약 운영환경에서 모든 ec2를 import한 후  .tf파일을 생성하지 않은채  apply 할 경우 모든 운영환경이 destroy 됨 
