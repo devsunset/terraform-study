@@ -237,6 +237,42 @@ https://kim-dragon.tistory.com/249
 	6. terraform destory - 선언된 리소스 한번에 제거
 
 
+# Terraform 변수 선언 예시 
+	* 입력 변수 
+	variable "NAME" {
+		description = "<description>"
+		default = <default>
+		type = <type>
+	}
+	- description(Option) : 변수를 설명하는 변수
+	- default(Option) : 변수에 값을 전달하는 여러가지 방법이 있는데 -var(명령줄), -var-file(파일), 
+	‘TF_VAR_<variable_name>’(환경변수)를 통해 값을 전달
+	만약 값이 전달되지 않으면 기본값을 할당 기본값이 없는 경우 테라폼은 사용자에게 변수에 대한 정보를 물음 
+	- type(Option) : 변수의 유형을 지정
+	string(문자열), number(숫자), bool(불리언), list(리스트), map(맵), set(집합), object(객체), tuple(튜플)등의 유형이 있음
+	유형을 지정하지 않으면 any로 간주합니다.
+
+	- ex) 변수에 값 전달 예시
+		#명령줄
+		$ terraform plan -var "server_port=8080"
+
+		#환경변수
+		$ export TF_VAR_server_port=8080
+		$ terraform plan
+
+	* 출력 변수 
+	output "NAME" {
+		value = "<value>"
+		description = <description>
+		senstive = <senstive>
+	}
+
+	- value : 출력하려는 값
+	- description(Option) : 출력 변수를 설명하는 변수
+	- senstive(Option) : 변수 출력 실행이 끝날때 기록하지 않도록 하려면 senstive를 true로 설정해야함 
+	 출력 변수에 개인정보 등 민감한 데이터가 있을 시 유용
+
+
 # Example
 
 * AWS example.tf
@@ -388,3 +424,50 @@ output "public_ip" {
 }
 
 
+* AWS main.tf  (변수 선언 예시)
+---------------------------------------------------------------------------
+variable "number_example" {
+  description = "An example of a number variable in Terraform"
+  type        = number
+  default     = 42
+}
+
+variable "list_example" {
+  description = "An example of a list in Terraform"
+  type        = list
+  default     = ["a", "b", "c"]
+}
+
+variable "list_numeric_example" {
+  description = "An example of a numeric list in Terraform"
+  type        = list(number)
+  default     = [1, 2, 3]
+}
+
+variable "map_example" {
+  description = "An example of a map in Terraform"
+  type        = map(string)
+
+  default = {
+    key1 = "value1"
+    key2 = "value2"
+    key3 = "value3"
+  }
+}
+
+variable "object_example" {
+  description = "An example of a structural type in Terraform"
+  type        = object({
+    name    = string
+    age     = number
+    tags    = list(string)
+    enabled = bool
+  })
+
+  default = {
+    name    = "value1"
+    age     = 42
+    tags    = ["a", "b", "c"]
+    enabled = true
+  }
+}
