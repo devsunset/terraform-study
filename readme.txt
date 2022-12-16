@@ -22,10 +22,12 @@ https://www.redhat.com/ko/topics/automation/what-is-infrastructure-as-code-iac
 https://hvho.github.io/2021-07-25/terraform-up-and-running-1
 
 - Terraform
+https://gurumee92.tistory.com/tag/%ED%85%8C%EB%9D%BC%ED%8F%BC
+https://j-dev.tistory.com/search/Terraform?page=1
+https://www.44bits.io/ko/keyword/terraform
 https://www.44bits.io/ko/post/terraform_introduction_infrastrucute_as_code
 https://j-dev.tistory.com/search/Terraform?page=1
 https://velog.io/@borab/terraform-%EC%9D%B4%EB%9E%80
-https://www.44bits.io/ko/keyword/terraform
 https://hvho.github.io/2021-08-29/terraform-up-and-running-2
 
 - Terraform AWS
@@ -154,6 +156,26 @@ https://kim-dragon.tistory.com/249
 	* 삭제(Destory)
 	모든 인프라를 삭제하는 명령어
 
+	------------------
+
+	* terraform import 
+	운영중인 리소스를 참조해서 code화 시킬 수 있음 
+	terraform(0.12.16)에서는 import 명령어를 사용하기 전에 빈 tf 파일이 존재해야 함 
+
+	terraform import aws_instance.<resource name> <instance ID>
+
+	import가 되었다면 .tfstate 파일이 업데이트 됨 (실행 폴더에 .tfstate 파일이 미존재시 새로 생성)
+	import는 사용에 매우 유의
+
+	테라폼은 apply시에 .tf 파일에는 없고 .tfstate 에만 있는 인프라 정보를 삭제
+	만약 운영환경에서 모든 ec2를 import한 후  .tf파일을 생성하지 않은채  apply 할 경우 모든 운영환경이 destroy 됨 
+
+	* terraform graph
+	하나의 리소스에서 다른 리소스로 참조를 추가하면 내재된 종속성이 작성
+	테라폼은 이러한 종속성 구문을 분석하여 그래프를 작성하고 이를 사용하여 리소스를 생성하는 순서를 자동으로 결정
+
+	------------------
+
 # Terraform Install
 
 https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
@@ -211,6 +233,7 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 	6. terraform destory - 선언된 리소스 한번에 제거
 
 # example.tf
+---------------------------------------------------------------------------
 provider "aws" {
   region     = "ap-northeast-2"
   access_key = "your_access_key"
@@ -266,14 +289,97 @@ resource "aws_instance" "example" {
   }
 }
 
-# terraform import 
-	운영중인 리소스를 참조해서 code화 시킬 수 있음 
-	terraform(0.12.16)에서는 import 명령어를 사용하기 전에 빈 tf 파일이 존재해야 함 
 
-	terraform import aws_instance.<resource name> <instance ID>
 
-	import가 되었다면 .tfstate 파일이 업데이트 됨 (실행 폴더에 .tfstate 파일이 미존재시 새로 생성)
-	import는 사용에 매우 유의
+# Web server example 
 
-	테라폼은 apply시에 .tf 파일에는 없고 .tfstate 에만 있는 인프라 정보를 삭제
-	만약 운영환경에서 모든 ec2를 import한 후  .tf파일을 생성하지 않은채  apply 할 경우 모든 운영환경이 destroy 됨 
+* GCP main.tf
+---------------------------------------------------------------------------
+provider "google" {
+  credentials = file("key.json")
+  project = "terraform-348208"
+  region = "asia-northeast3"
+}
+
+resource "google_compute_instance" "example" {
+  name = "webserver"
+  machine_type = "f1-micro"
+  zone = "asia-northeast3-a"
+
+  boot_disk {
+    initialize_params {
+      image = "gcr.io/google-containers/busybox"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+
+  tags = ["web"]
+
+  metadata_startup_script = <<-EOF
+              #!/bin/bash
+              echo "Hello, World" > index.html
+              nohup busybox httpd -f -p 8080 &
+              EOF
+}
+
+resource "google_compute_firewall" "default" {
+  name    = "webserver-firewall"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8080"]
+  }
+
+  source_tags = ["web"]
+  target_tags = ["web"]
+}	
+
+* AWS main.tf
+---------------------------------------------------------------------------
+provider "aws" {
+  region = "us-east-2"
+}
+
+resource "aws_instance" "example" {
+  ami                    = "ami-xxxxxxxxxxx"
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.instance.id]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "Hello, World" > index.html
+              nohup busybox httpd -f -p 8080 &
+              EOF
+
+  tags = {
+    Name = "terraform-example"
+  }
+}
+
+resource "aws_security_group" "instance" {
+
+  name = var.security_group_name
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+variable "security_group_name" {
+  description = "The name of the security group"
+  type        = string
+  default     = "terraform-example-instance"
+}
+
+output "public_ip" {
+  value       = aws_instance.example.public_ip
+  description = "The public IP of the Instance"
+}
