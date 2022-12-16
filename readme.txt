@@ -96,9 +96,9 @@ https://kim-dragon.tistory.com/249
 # Terraform
 	Terraform은 Hashicorp에서 오픈소스로 개발중인 클라우드 인프라스트럭처 자동화를 지향하는 Infrastructure as Code, IaC 도구
 	IaC는 코드로 인프라스트럭처를 관리한다는 개념으로 테라폼에서는 하시코프 설정 언어HCL, Hashicorp Configuration Language을
-	사용해 클라우드 리소스를 선언 아마존 웹 서비스Amazon Web Service가 자체적으로 만든 AWS CloudFormation의 경우 AWS만 지원하는
-	것과 달리 테라폼의 경우 Amazon Web Service, Google Cloud Platform, Microsoft Azure와 같은 주요 클라우드 서비스를 비롯한 
-	다양한 클라우드 서비스들을 프로바이더 방식으로 제공
+	사용해 클라우드 리소스를 선언 아마존 웹 서비스Amazon Web Service가 자체적으로 만든 AWS CloudFormation의 경우 
+	AWS만 지원하는	것과 달리 테라폼의 경우 Amazon Web Service, Google Cloud Platform, Microsoft Azure와 같은 주요 
+	클라우드 서비스를 비롯한 	다양한 클라우드 서비스들을 프로바이더 방식으로 제공
 	이를 통해 테라폼만으로 멀티 클라우드의 리소스들을 선언하고 코드로 관리하는 것도 가능
 
 	테라폼은 고Go 프로그래밍 언어로 개발 
