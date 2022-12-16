@@ -12,7 +12,11 @@ https://developer.hashicorp.com/terraform/docs
 
 https://developer.hashicorp.com/terraform/docs/terraform-tools
 
+https://registry.terraform.io/
+
 https://github.com/shuaibiyy/awesome-terraform
+
+https://t1.daumcdn.net/cfile/tistory/99938D445C9DADAC25?original
 
 ########################################################
 ### Reference
@@ -22,6 +26,7 @@ https://www.redhat.com/ko/topics/automation/what-is-infrastructure-as-code-iac
 https://hvho.github.io/2021-07-25/terraform-up-and-running-1
 
 - Terraform
+https://t1.daumcdn.net/cfile/tistory/99938D445C9DADAC25?original
 https://gurumee92.tistory.com/category/IaC/Terraform
 https://j-dev.tistory.com/search/Terraform?page=1
 https://www.44bits.io/ko/keyword/terraform
@@ -46,6 +51,17 @@ https://docs.toast.com/ko/Compute/Instance/ko/terraform-guide/
 
 - Terraform Etc
 https://kim-dragon.tistory.com/249
+
+- Github source
+https://github.com/hashicorp/terraform-guides
+https://github.com/hashicorp/tfc-guide-example
+https://github.com/futurice/terraform-examples
+https://github.com/ContainerSolutions/terraform-examples
+https://github.com/gruntwork-io/intro-to-terraform
+https://github.com/alfonsof/terraform-aws-examples
+https://github.com/PARKINHYO/WordPress-Terraform
+https://github.com/gurumee92/gurumee-book-terraform
+https://github.com/rampart81/terraform-examples
 
 ########################################################
 ### Terraform Guide
