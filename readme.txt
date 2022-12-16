@@ -373,6 +373,156 @@ https://kim-dragon.tistory.com/249
 	테라그런트를 사용하는 경우 apply-all 명령을 사용하여 이 프로세스를 자동화 할 수는 있음 
 	다른 폴더에 있는 리소스를 직접 액세스 할 수 없어 리소스 종속성을 사용할 수 없음 
 
+# Terraform 모듈 
+	테라폼으로 인프라의 규모가 커질경우 하나의 파일에 모든것을 정의할 경우 의도치않게 다른 부분에 영향을 끼칠 수 있고
+	환경별 같은 리소스의 코드가 중복되어 쌓일수가 있음 
+	이러한 단점을 해결하기 위해 테라폼은 모듈이란 요소를 제공
+	모듈은 관련있는 요소끼리 모아 하나의 패키지를 만든다
+	예를 들어 VPC 모듈의 경우 서브넷, netmask 등의 리소스를 하나의 패키징을 한다.
+
+	- 모듈의 장점
+	1. 캡슐화 : 서로 관련있는 요소들 끼리만 캡슐화를 하여 의도치 않은 문제 발생을 예방
+	2. 재사용성 : 모듈을 사용하여 리소스를 정의하면 다른 환경에서도 해당 리소스를 쉽게 재사용
+	3. 일관성 : 매번 새로 작성하게 되면 사람에 따라 리소스의 옵션이 빠지는 부분이 생길수도 있고 
+	   매번 같을 수 없기에 모듈을 재 사용시 일관성을 유지 
+
+
+	*  모듈의 기본 구문 예시
+	module "<NAME>" {
+		source = "<SOURCE>"
+		[CONFIG...]
+	}
+
+	위와 같은 구문을 사용하여 모듈의 경로를 지정하여 참조
+
+	provider "google" {
+	  credentials = file("key.json")
+	  project = "terraform-348208"
+	  region = "asia-northeast3"
+	}
+
+	module "webserver_cluster" {
+		source = "../../../modules/services/webserver-cluster"
+	}
+
+	* 모듈 입력
+	테라폼의 모듈에서도 입력 매개 변수를 만들어 사용할 수 있음 
+
+	- 모듈 코드 예시
+	variable "cluster_name" {
+	  description = "The name to use for all the cluster resources"
+	  type        = string
+	}
+
+	resource "aws_security_group" "instance" {
+	  name = "${var.cluster_name}-instance"
+	}
+
+	- 모듈을 사용하는 코드 예시
+	module "webserver_cluster" {
+	  source = "../modules/webserver-cluster"
+		
+	  cluster_name = "webserver-prod"
+	}
+
+	* 모듈 지역 변수
+	변수를 입력받는 대신 공통적으로 사용하고 있는 값들은 지역변수로 정의하여 사용
+
+	- 지역 변수 문법
+	local.<NAME>
+
+	- 모듈에서 사용 예시
+	locals {
+	  http_port    = 80
+	  any_port     = 0
+	  any_protocol = "-1"
+	  tcp_protocol = "tcp"
+	  all_ips      = ["0.0.0.0/0"]
+	}
+
+	resource "aws_security_group_rule" "allow_http_inbound" {
+	  type              = "ingress"
+	  security_group_id = aws_security_group.alb.id
+
+	  from_port   = local.http_port
+	  to_port     = local.http_port
+	  protocol    = local.tcp_protocol
+	  cidr_blocks = local.all_ips
+	}
+
+	*  모듈 출력 변수
+	- 모듈에서 output 선언
+	output "asg_name" {
+	  value       = aws_autoscaling_group.example.name
+	  description = "The name of the Auto Scaling Group"
+	}
+
+	- 모듈 output 사용 문법 예시
+	module.<MODULE_NAME>.<OUTPUT_NAME>
+
+
+	- 모듈 output 사용 예시
+	module "webserver_cluster" {
+	  source = "../../../modules/services/webserver-cluster"
+	}
+
+	resource "aws_autoscaling_schedule" "scale_out_during_business_hours" {
+	  scheduled_action_name = "scale-out-during-business-hours"
+	  min_size              = 2
+	  max_size              = 10
+	  desired_capacity      = 10
+	  recurrence            = "0 9 * * *"
+
+	  autoscaling_group_name = module.webserver_cluster.asg_name
+	}
+
+	* 모듈 주의 사항
+
+	1. 파일 경로
+	테라폼은 내장 함수 file을 사용하여 디스크에서 파일을 읽을 수 있음 
+	file 함수를 사용할 때 파일 경로가 상대 경로여야 함 
+	즉, terraform apply 명령어를 실행하는 경로에서는 file 함수를 사용할 수 있지만
+	참조되는 별도의 모듈에서는 file 함수를 사용할 수는 없음 
+
+
+	이 문제를 해결하기 위해서는 경로 참조 표현식을 사용
+	path.<TYPE>
+
+	    path.module : 해당 표현식이 있는 모듈의 파일 시스템 경로
+	    path.root : terraform apply를 실행하는 루트 모듈의 파일 시스템 경로
+	    path.cwd : 현재 작업 중인 파일 시스템의 경로를 반환
+	    일반적으로는 path.root와 동일하지만 테라폼 일부 기능은 다른 디렉토리에서 작동하므로 경로가 달라질 수 있음 
+
+	- 사용 예시
+	data "template_file" "user_data" {
+	  template = file("${path.module}/user-data.sh")
+	}
+
+	2. 인라인 블록
+	일부 테라폼 리소스의 구성은 인라인 블록 또는 별도의 리소스로 정의
+	모듈을 작성할때는 인라인 블록 대신 별도의 리소스를 사용해야 유연성이 높음 
+
+	- 인라인 블록 예시
+	resource "aws_security_group" "alb" {
+	  ....
+	  ingress {
+		  from_port   = local.http_port
+		  to_port     = local.http_port
+		  protocol    = local.tcp_protocol
+		  cidr_blocks = local.all_ips
+	  }
+	}
+
+	- 리소스 예시
+	resource "aws_security_group_rule" "allow_http_inbound" {
+	  type              = "ingress"
+	  security_group_id = aws_security_group.alb.id
+
+	  from_port   = local.http_port
+	  to_port     = local.http_port
+	  protocol    = local.tcp_protocol
+	  cidr_blocks = local.all_ips
+	}
 
 # Example
 
