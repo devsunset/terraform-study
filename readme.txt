@@ -254,8 +254,8 @@ https://kim-dragon.tistory.com/249
 	‘TF_VAR_<variable_name>’(환경변수)를 통해 값을 전달
 	만약 값이 전달되지 않으면 기본값을 할당 기본값이 없는 경우 테라폼은 사용자에게 변수에 대한 정보를 물음 
 	- type(Option) : 변수의 유형을 지정
-	string(문자열), number(숫자), bool(불리언), list(리스트), map(맵), set(집합), object(객체), tuple(튜플)등의 유형이 있음
-	유형을 지정하지 않으면 any로 간주합니다.
+	string, number, bool, list, map, set, object, tuple등의 유형이 있음
+	유형을 지정하지 않으면 any로 간주
 
 	- ex) 변수에 값 전달 예시
 		#명령줄
@@ -292,7 +292,7 @@ https://kim-dragon.tistory.com/249
     운영 환경이 중단되는 경우가 없는지 확인해야 합니다.
 
 
-    ▶ 상태 파일 공유
+    * 상태 파일 공유
 	테라폼의 상태 파일을 깃과 같은 형상관리 시스템에 공유하는 것은 다음과 같은 이유 때문에 부적절
 	1. 변경 사항을 실행하고 나서 푸시하는 것을 누락 할 수 있음 
 	2. 여러 명의 팀 구성원이 동시에 하나의 상태 파일에 apply 명령을 실행하지 못하게 하는 잠금 기능을 제공하지 않음
@@ -333,7 +333,7 @@ https://kim-dragon.tistory.com/249
 	https://www.terraform.io/language/settings/backends/configuration
 
 
-	▶ 상태 파일 격리
+	* 상태 파일 격리
 	하나의 환경에서 문제가 발생하더라도 다른 환경에 영향을 주지 않도록 상태 파일을 격리
 
 	1.작업 공간을 통한 격리
