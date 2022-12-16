@@ -232,7 +232,11 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 	5. terraform appply - 선언된 리소스들을 적용r
 	6. terraform destory - 선언된 리소스 한번에 제거
 
-# example.tf
+
+
+# Example
+
+* AWS example.tf
 ---------------------------------------------------------------------------
 provider "aws" {
   region     = "ap-northeast-2"
@@ -289,11 +293,7 @@ resource "aws_instance" "example" {
   }
 }
 
-
-
-# Web server example 
-
-* GCP main.tf
+* GCP main.tf  (Web server)
 ---------------------------------------------------------------------------
 provider "google" {
   credentials = file("key.json")
@@ -339,7 +339,7 @@ resource "google_compute_firewall" "default" {
   target_tags = ["web"]
 }	
 
-* AWS main.tf
+* AWS main.tf  (Web server)
 ---------------------------------------------------------------------------
 provider "aws" {
   region = "us-east-2"
@@ -383,3 +383,5 @@ output "public_ip" {
   value       = aws_instance.example.public_ip
   description = "The public IP of the Instance"
 }
+
+
