@@ -277,6 +277,102 @@ https://kim-dragon.tistory.com/249
 	- senstive(Option) : 변수 출력 실행이 끝날때 기록하지 않도록 하려면 senstive를 true로 설정해야함 
 	 출력 변수에 개인정보 등 민감한 데이터가 있을 시 유용
 
+# Terraform 상태 / Backend
+	해당 파일에는 테라폼을 실행 시 매핑되는 리소스들의 상태값을 가지고 있음 
+	기본적으로 /terraform/test 폴더에서 테라폼을 실행하면 JSON 형태의 /terraform/testterraform.tfstate 파일을 생성
+	상태파일은 프라이빗이며 직접 편집하거나 수정해서는 안됨 
+	파일 상태를 조작해야 하는 경우 terraform import, terraform state 명령을 통해 조작
+
+
+    테라폼을 사용하여 인프라를 업데이트하려면 각 팀원이 동일한 테라폼 상태 파일에 엑세스해야 하므로, 
+    상태 파일을 공유 위치에 저장해야 합니다.
+    두 팀원이 동시에 테라폼을 실행하는 경우 여러 테라폼 프로세스가 상태 파일을 동시에 업데이트하여 충돌을 일으킬 수 있습니다. 
+    이러한 상태가 되면 데이터가 손실되거나 상태 파일이 손상될 수 있습니다.
+    인프라를 변경할 때는 다른 환경을 격리하는 것이 가장 좋습니다. 예를 들어 테스트 환경을 변경할 경우 실수로 
+    운영 환경이 중단되는 경우가 없는지 확인해야 합니다.
+
+
+    ▶ 상태 파일 공유
+	테라폼의 상태 파일을 깃과 같은 형상관리 시스템에 공유하는 것은 다음과 같은 이유 때문에 부적절
+	1. 변경 사항을 실행하고 나서 푸시하는 것을 누락 할 수 있음 
+	2. 여러 명의 팀 구성원이 동시에 하나의 상태 파일에 apply 명령을 실행하지 못하게 하는 잠금 기능을 제공하지 않음
+	3. 테라폼의 상태 파일은 모든 데이터를 평문으로 저장하기에 보안적으로 적절하지 않음
+
+	위의 문제와 같은 상황을 해결하기 위해서는 테라폼에 내장된 원격 백엔드 기능을 사용하여 클라우드 스토리지에 저장하는 것이 좋음
+	1. 원격 백엔드 구성 시 테라폼은 plan이나 apply 명령을 실행할 때마다 해당 백엔드에서 상태 파일을 자동으로 로드 
+	apply 명령을 실행한 후에는 상태 파일을 백엔드에 자동 저장
+	2. apply 명령을 실행 시 자동으로 잠금을 활성화 -lock-timeout=<TIME>을 사용하면 apply 명령을 실행할 때 잠금이
+	 해제되기까지 테라폼이 얼마 동안 대기하도록 할지 설정
+	3. 데이터를 보내거나 상태 파일을 저장할 때 암호화하는 기능을 지원
+
+
+	테라폼 백엔드에는 몇 가지 단점 존재
+
+	1. 2단계로 백엔드를 구성
+	- 백엔드 구성 시
+	    테라폼 코드를 작성하여 S3 버킷 및 다이나모DB 테이블을 생성하고 해당 코드를 로컬 백엔드와 함께 배포
+	    테라폼 코드로 돌아가서 원격 백엔드 구성을 추가 새로 생성된 S3 버킷과 다이나모 DB 테이블을 사용하고,
+	    init 명령을 실행하여 로컬 상태를 S3에 복사
+
+	- 백엔드 삭제 시
+	    백엔드 구성을 제거한 다음 init 명령을 실행하여 테라폼 상태를 로컬 디스크에 다시 복사
+	    destroy 명령을 실행하여 S3 버킷 및 다이나모DB 테이블을 삭제
+
+
+	2. 테라폼의 백엔드 블록에서는 변수나 참조를 사용할 수 없음 
+	해당 단점의 유일한 해결책은 init 명령어 실행 시 -backend-config 옵션을 통해 변수를 전달하는 것 
+
+ 
+	GCP 스토리지 백엔드 참조
+	https://www.terraform.io/language/settings/backends/gcs
+
+	AWS S3 백엔드 참조
+	https://www.terraform.io/language/settings/backends/s3
+
+	백엔드 구성 참조
+	https://www.terraform.io/language/settings/backends/configuration
+
+
+	▶ 상태 파일 격리
+	하나의 환경에서 문제가 발생하더라도 다른 환경에 영향을 주지 않도록 상태 파일을 격리
+
+	1.작업 공간을 통한 격리
+	테라폼은 별도의 이름을 가진 여러 개의 작업 공간에 저장할 수 있음 
+	테라폼은 default라는 기본 작업 공간에서 시작하며 작업 공간을 지정하지 않으면 기본 작업 공간을 사용
+
+
+	# 테라폼 워크 스페이스를 생성합니다.
+	$ terraform workspace new example1
+
+	# 현재 사용중인 워크스페이스를 보여줍니다.
+	$ terraform workspace show
+
+	# 생성된 워크스페이스 목록을 보여줍니다.
+	$ terraform workspace list
+
+	# 워크스페이스를 전환할 수 있습니다.
+	$ terraform workspace select <workspace name>
+
+	워크스페이스 생성 후 적용 시 S3에는 ‘evn:’ 라는 폴더가 생성 되고, 각 워크스페이스 마다 각자의 상태 파일을 따로 보유 
+	GCP에서는 백엔드에 지정한 경로에 워크스페이스 명.tfstate 파일이 생성
+
+	위의 워크스페이스에는 몇 가지 단점이 있음 
+    모든 작업 공간의 상태 파일이 동일한 스토리지에 저장
+    terraform workspace 명령어를 실행하지 않으면 워크스페이스에 대한 정보를 알기가 어려움
+    어떠한 워크스페이스에서 작업하는지 잊어버릴 수가 있어 실수를 할 수가 있음 
+
+    2. 파일 레이아웃을 이용한 격리
+	환경을 완전히 격리하려면  각 테라폼 구성 파일을 분리된 폴더에 위치 
+	예를 들어 스테이징 환경의 대한 모든 구성은 stage 폴더에, 프로덕션 환경의 모든 구성은 prod 폴더에 위치 
+    서로 다른 권한을 사용하여 다른 백엔드를 구성 예를 들어 각 환경은 각각 분리된 S3 버킷을 백엔드로 사용
+	각 환경별 VPC, 서비스, 데이터 베이스 같은 각 구성 요소를 별도의 테라폼 폴더 혹은 별도의 상태 파일에서 사용하는 것을 권장 
+
+	위와 같은 구성은 면에서 단점
+    실수로 인한 인프라를 망가뜨리진 않겠지만 한 번의 명령으로 전체 인프라를 만들수 없음 
+    위와 같은 구성에서는 각 구성 요소 각각에 apply 명령을 실행해야 함
+    테라그런트를 사용하는 경우 apply-all 명령을 사용하여 이 프로세스를 자동화 할 수는 있음 
+    다른 폴더에 있는 리소스를 직접 액세스 할 수 없어 리소스 종속성을 사용할 수 없음 
+
 
 # Example
 
@@ -337,7 +433,7 @@ resource "aws_instance" "example" {
   }
 }
 
-* GCP main.tf  (Web server)
+* GCP example.tf  (Web server)
 ---------------------------------------------------------------------------
 provider "google" {
   credentials = file("key.json")
@@ -383,7 +479,7 @@ resource "google_compute_firewall" "default" {
   target_tags = ["web"]
 }	
 
-* AWS main.tf  (Web server)
+* AWS example.tf  (Web server)
 ---------------------------------------------------------------------------
 provider "aws" {
   region = "us-east-2"
@@ -429,7 +525,7 @@ output "public_ip" {
 }
 
 
-* AWS main.tf  (변수 선언 예시)
+* AWS example.tf  (변수 선언 예시)
 ---------------------------------------------------------------------------
 variable "number_example" {
   description = "An example of a number variable in Terraform"
@@ -474,5 +570,92 @@ variable "object_example" {
     age     = 42
     tags    = ["a", "b", "c"]
     enabled = true
+  }
+}
+
+
+* GCP example.tf  (스토리지 생성 리소스)
+---------------------------------------------------------------------------
+provider "google" {
+  credentials = file("key2.json")
+  project = "terraform-348208"
+  region = "asia-northeast3"
+}
+
+resource "random_id" "instance_id" {
+  byte_length = 8
+}
+
+resource "google_storage_bucket" "terraform_state" {
+
+  # 버킷 이름
+  name = "terraform-up-and-running-state-${random_id.instance_id.hex}"
+
+  # 버킷을 삭제할 때 해당 버킷에 포함된 모든 객체를 삭제합니다.
+  force_destroy = true
+
+  location = "ASIA"
+
+  storage_class = "Standard"
+
+  # 실수로 S3 버킷을 삭제하는 것을 방지합니다.(생명주기 설정)
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  # 코드 이력을 관리하기 위해 상태 파일의 버전 관리를 활성화합니다.
+  versioning {
+    enabled = false
+  }
+
+  // GCP는 스토리지 디폴트가 암호화
+
+}
+
+terraform {
+  backend "gcs" {
+    bucket = "terraform-up-and-running-state-0d9027ef04cb8b9b"
+    credentials = "key2.json"
+  }
+}
+
+* AWS example.tf  (S3 생성 리소스)
+---------------------------------------------------------------------------
+provider "aws" {
+  region = "us-east-2"
+}
+
+resource "aws_s3_bucket" "terraform_state" {
+
+  bucket = var.bucket_name
+
+  // This is only here so we can destroy the bucket as part of automated tests. You should not copy this for production
+  // usage
+  force_destroy = true
+
+  # 상태 파일의 이력관리를 위해
+  # 버전관리 기능을 활성화 합니다.
+  versioning {
+    enabled = true
+  }
+
+  # Enable server-side encryption by default
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = var.table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
   }
 }
